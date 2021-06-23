@@ -1,5 +1,5 @@
 # otu
-otu is OBS themes utility an handle tool for work with your scenes of Open Broadcaster Software
+**otu** ( OBS themes utility ) is  [Node.js](https://nodejs.org) script, an handle tool for work with your scenes of Open Broadcaster Software
 
 # Description
 otu is an utility to permit to export/import your theme with all files, and many features are added in the next release
@@ -9,12 +9,12 @@ otu is an utility to permit to export/import your theme with all files, and many
 npm install
 ```
 # Features
-* Export OBS theme scene, with all files of
+* Export OBS theme scene
 * Import OBS theme scene
 
 # Usage
 ### Export
-Create an zip archive (.otu) from scene.json with all files present on scenes
+Create a zip archive (.otu) from scene.json with all files present on scenes
 
 ```bash
 otu.js export -i myscene.json -o myscenearchive.otu
