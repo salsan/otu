@@ -1,0 +1,24 @@
+{
+  "dependencies": {
+    "adm-zip": "^0.5.5",
+    "yargs": "^17.0.1"
+  },
+  "name": "otu",
+  "version": "0.0.2",
+  "bin": {
+    "otu": "otu.js"
+  },
+  "description": "OBS Themes Utility is an handle tool for work with your scenes of Open Broadcaster Software",
+  "main": "otu.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "OBS",
+    "utility",
+    "tool"
+  ],
+  "author": "Salvatore Santagati info@salsan.dev",
+  "license": "GPL-3.0-or-later"
+}
