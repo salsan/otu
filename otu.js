@@ -62,6 +62,7 @@ yargs(hideBin(process.argv))
   .alias('version', 'v')
   .argv;
 
+
 /**
  * @description importTheme return compatible scene version from original and extract files
  * @param {string} fsource - source file
@@ -78,6 +79,16 @@ function importTheme(fsource, fdest, options) {
   const currentDir = path.dirname(fdest)
 
   theme["sources"].forEach(src => {
+
+    if (typeof(src.settings.files) !== 'undefined') {
+      src.settings.files.forEach((item, index) => {
+        if (fs.statSync(item.value).isFile()) {
+          zip.extractEntryTo("files/" + path.win32.basename(item.value), currentDir, true, true);
+        } else zip.extractEntryTo("files/" + path.win32.basename(item.value) + "/", currentDir, true, true);
+
+        src.settings.files[index].value = path.resolve(currentDir, 'files', path.win32.basename(src.settings.files[index].value));
+      })
+    }
 
     if (typeof(src.settings.file) !== 'undefined') {
 
@@ -102,7 +113,7 @@ function importTheme(fsource, fdest, options) {
 
   fs.writeFile(fdest, JSON.stringify(theme), function(err) {
     if (err) return console.log(err);
-    console.log('Completed!!!');
+    console.log('Completed!!! '+fdest);
     return;
   });
 }
@@ -124,17 +135,28 @@ function exportTheme(fsource, fdest, options) {
 
     theme["sources"].forEach(src => {
 
+      if (typeof(src.settings.files) !== 'undefined') {
+        src.settings.files.forEach(item => {
+          if (fs.existsSync(item.value)) {
+            if (fs.statSync(item.value).isFile()) {
+              zip.addLocalFile(item.value, 'files/', path.win32.basename(item.value));
+            } else {
+              zip.addFile('files/' + path.win32.basename(item.value) + '/', Buffer.alloc(0), "", fs.statSync(item.value));
+              zip.addLocalFolder(item.value, 'files/' + path.win32.basename(item.value) + '/');
+            }
+          }
+        })
+      };
+
       if ((typeof(src.settings.file) !== 'undefined') && fs.existsSync(src.settings.file)) {
         zip.addLocalFile(src.settings.file, 'files/', path.win32.basename(src.settings.file))
       };
 
       if ((typeof(src.settings.custom_font) !== 'undefined') && fs.existsSync(src.settings.custom_font)) {
-
         zip.addLocalFile(src.settings.custom_font, 'files/', path.win32.basename(src.settings.custom_font))
       };
 
       if ((typeof(src.settings.local_file) !== 'undefined') && fs.existsSync(src.settings.local_file)) {
-
         zip.addLocalFile(src.settings.local_file, 'files/', path.win32.basename(src.settings.local_file))
       };
 
@@ -142,6 +164,7 @@ function exportTheme(fsource, fdest, options) {
 
     zip.addFile("theme.json", Buffer.from(JSON.stringify(theme), "utf8"));
     zip.writeZip(fdest + ".otu");
+    console.log('Completed!!! '+fdest+'.otu');
 
   });
 

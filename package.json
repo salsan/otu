@@ -3,8 +3,8 @@
     "adm-zip": "^0.5.5",
     "yargs": "^17.0.1"
   },
-  "name": "otu",
-  "version": "0.0.2",
+  "name": "otu-tool",
+  "version": "0.0.3",
   "bin": {
     "otu": "otu.js"
   },
@@ -20,5 +20,13 @@
     "tool"
   ],
   "author": "Salvatore Santagati info@salsan.dev",
-  "license": "GPL-3.0-or-later"
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/salsan/otu.git"
+  },
+  "bugs": {
+    "url": "https://github.com/salsan/otu/issues"
+  },
+  "homepage": "https://github.com/salsan/otu#readme"
 }
