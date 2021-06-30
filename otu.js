@@ -1,10 +1,18 @@
+#!/usr/bin/env node
+
+"use strict";
+
 const fs = require('fs');
 const path = require('path');
 const Archive = require('adm-zip');
-const yargs = require('yargs/yargs')
+const yargs = require('yargs/yargs');
 const {
   hideBin
-} = require('yargs/helpers')
+} = require('yargs/helpers');
+const openType = require('opentype.js');
+const {
+  exec
+} = require('child_process');
 
 yargs(hideBin(process.argv))
   .usage('Usage: $0 <command> [options]')
@@ -73,16 +81,16 @@ yargs(hideBin(process.argv))
 function importTheme(fsource, fdest, options) {
 
   const zip = new Archive(fsource);
-  const zipEntries = zip.getEntries();
-  const scene = zipEntries.filter(zipEntry => zipEntry.entryName == 'theme.json');
-  const theme = JSON.parse(scene[0].getData().toString("utf8"));
-  const currentDir = path.dirname(fdest)
+  const scene = zip.getEntry('theme.json');
+  const theme = JSON.parse(scene.getData().toString("utf8"));
+  const currentDir = path.dirname(fdest);
+  const fontDir = process.env.LOCALAPPDATA + '\\Microsoft\\Windows\\Fonts\\'; // Windows 1
 
   theme["sources"].forEach(src => {
 
     if (typeof(src.settings.files) !== 'undefined') {
       src.settings.files.forEach((item, index) => {
-        if (fs.statSync(item.value).isFile()) {
+        if ((fs.statSync(item.value).isFile()) && (zip.getEntry('files/' + path.win32.basename((item.value))))) {
           zip.extractEntryTo("files/" + path.win32.basename(item.value), currentDir, true, true);
         } else zip.extractEntryTo("files/" + path.win32.basename(item.value) + "/", currentDir, true, true);
 
@@ -90,16 +98,41 @@ function importTheme(fsource, fdest, options) {
       })
     }
 
-    if (typeof(src.settings.file) !== 'undefined') {
+    if ((typeof(src.settings.file) !== 'undefined') && (zip.getEntry('files/' + path.win32.basename(src.settings.file)))) {
+      console.log(src.settings.file);
 
       src.settings.file = path.resolve(currentDir, 'files', path.win32.basename(src.settings.file));
-      zip.extractEntryTo("files/" + path.win32.basename(src.settings.file), currentDir, true, true);
+      zip.extractEntryTo('files/' + path.win32.basename(src.settings.file), currentDir, true, true);
     }
 
-    if (typeof(src.settings.custom_font) !== 'undefined') {
+    if ((typeof(src.settings.custom_font) !== 'undefined') && (zip.getEntry('files/' + path.win32.basename(src.settings.custom_font)))) {
+      let fontPath = fontDir + path.win32.basename(src.settings.custom_font);
+      src.settings.custom_font = fontPath;
 
-      src.settings.custom_font = path.resolve(currentDir, 'files', path.win32.basename(src.settings.custom_font));
-      zip.extractEntryTo("files/" + path.win32.basename(src.settings.custom_font), currentDir, true, true);
+      if (!fs.existsSync(fontPath)) {
+        zip.extractEntryTo('files/' + path.win32.basename(src.settings.custom_font), fontDir, false, false);
+
+        let font = openType.loadSync(fontPath);
+        let fontFamilyName = font["tables"]["name"]["fontFamily"]["en"] + ' (TrueType)';
+        let strReg = 'reg add "HKCU\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Fonts" /v ' + '"' + fontFamilyName + '"' + ' /t REG_SZ /d ' + '"' + fontPath + '"' + ' /f';
+
+        const result = exec(strReg, (error, stdout, stderr) => {
+
+          if (error) {
+            console.error(`error: ${error.message}`);
+            return;
+          }
+
+          if (stderr) {
+            console.error(`stderr: ${stderr}`);
+            return;
+          }
+
+          console.log(`stdout:\n${stdout}`);
+        })
+      } else console.log("File exist : " + fontPath);
+
+
     }
 
     if (typeof(src.settings.local_file) !== 'undefined') {
@@ -109,11 +142,11 @@ function importTheme(fsource, fdest, options) {
   });
 
 
-  fdest = fdest || theme["name"] + ".json";
+  fdest = fdest || theme["name"];
 
-  fs.writeFile(fdest, JSON.stringify(theme), function(err) {
+  fs.writeFile(fdest + '.json', JSON.stringify(theme), function(err) {
     if (err) return console.log(err);
-    console.log('Completed!!! '+fdest);
+    console.log('Completed!!! ' + fdest + '.json');
     return;
   });
 }
@@ -164,7 +197,7 @@ function exportTheme(fsource, fdest, options) {
 
     zip.addFile("theme.json", Buffer.from(JSON.stringify(theme), "utf8"));
     zip.writeZip(fdest + ".otu");
-    console.log('Completed!!! '+fdest+'.otu');
+    console.log('Completed!!! ' + fdest + '.otu');
 
   });
 

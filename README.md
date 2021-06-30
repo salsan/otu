@@ -28,12 +28,12 @@ otu.js import -i myscenearchive.otu -o myscene.json
 * [OBS Studio](https://obsproject.com/)
 
 # Download
-* [Last Releas](https://github.com/salsan/otu/releases)
+* [Last Release](https://github.com/salsan/otu/releases)
 
 # Todo
-1. Check fonts and install it if is required
-2. Extract/Add single scene of your theme with relative files
-3. Convert [Streamlabs OBS](https://streamlabs.com/streamlabs-obs-live-streaming-software)scenes to [OBS Broadcaster Software](https://obsproject.com/)
+- [ ] Check fonts ~~and install it if is required~~
+- [ ] Extract/Add single scene of your theme with relative files
+- [ ] Convert [Streamlabs OBS](https://streamlabs.com/streamlabs-obs-live-streaming-software) scenes to [OBS Broadcaster Software](https://obsproject.com/)
 
 # License
 

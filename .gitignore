@@ -102,3 +102,13 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Pkg Binary
+otu-tool-linux
+otu-tool-macos
+otu-tool-win.exe
+
+# Vim Temp
+*~
+*.swp
+*.swo
