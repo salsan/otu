@@ -6,7 +6,7 @@ otu is an utility to permit to export/import your theme with all files, and many
 
 # Installation
 ```bash
-npm install
+npm i otu-tool
 ```
 # Features
 * Export OBS theme scene
@@ -17,12 +17,12 @@ npm install
 Create a zip archive (.otu) from scene.json with all files present on scenes
 
 ```bash
-otu.js export -i myscene.json -o myscenearchive.otu
+otu-tool export -i myscene.json -o myscenearchive.otu
 ```
 ### Import
 Extract files from zip archive (.otu) and create scene.json for OBS
 ```bash
-otu.js import -i myscenearchive.otu -o myscene.json
+otu-tool import -i myscenearchive.otu -o myscene.json
 ```
 # Supported Broadcaster Sofware
 * [OBS Studio](https://obsproject.com/)

@@ -15,6 +15,7 @@ const {
 } = require('child_process');
 
 yargs(hideBin(process.argv))
+  .scriptName("otu-tool")
   .usage('Usage: $0 <command> [options]')
   .command('import [input] [output]', 'import theme obs', {
       input: {

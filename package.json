@@ -5,7 +5,7 @@
     "yargs": "^17.0.1"
   },
   "name": "otu-tool",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "bin": {
     "otu-tool": "otu.js"
   },
@@ -29,5 +29,10 @@
   "bugs": {
     "url": "https://github.com/salsan/otu/issues"
   },
-  "homepage": "https://github.com/salsan/otu#readme"
+  "homepage": "https://github.com/salsan/otu#readme",
+  "pkg": {
+    "targets": [
+      "node14-win-x64"
+    ]
+  }
 }
