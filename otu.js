@@ -65,12 +65,130 @@ yargs(hideBin(process.argv))
         return false;
       }
     }
-  )
+  ).command('extract [input] [output]', 'extract scene from theme', {
+      input: {
+        description: 'insert path of theme want export',
+        alias: 'i',
+        demandOption: true,
+        type: 'string',
+        requiresArg: true,
+      },
+      output: {
+        description: 'insert path where save',
+        alias: 'o',
+        type: 'string',
+        requiresArg: true
+      },
+      scene: {
+        description: 'name scene want extract',
+        alias: 's',
+        type: 'string',
+        requiresArg: true
+      }
+    },
+    (argv) => {
+      if (fs.existsSync(argv.input)) {
+        extractScene(argv.input, argv.output, argv.scene, argv);
+      } else {
+        console.log(argv.input + "file doesn't exist")
+        return false;
+      }
+    })
   .help()
   .alias('help', 'h')
   .alias('version', 'v')
   .argv;
 
+/**
+ * @description checkItemsRequired check all items required from scene
+ * @param {Object} theme - full source of original theme
+ * @param {Object} source	- items required from scene
+ */
+function checkItemsRequired(theme, source) {
+
+  const itemsRequired = [];
+
+  source.forEach(name => {
+    itemsRequired.push(name);
+
+    let sceneCurr = theme["sources"].filter(scene => scene.name == name)[0];
+
+    if (sceneCurr.settings.items !== undefined) {
+      const items = sceneCurr.settings.items.map(item => item.name);
+      itemsRequired.push(checkItemsRequired(theme, items));
+    }
+
+  });
+
+  return itemsRequired.flat();
+
+}
+
+/**
+ * @description extractScene extract scene from theme
+ * @param {string} fsource - source file
+ * @param {string} fdest	- destination file
+ * @param {string} sceneName - name of scene want extract
+ * @param {Object} options - Options
+ */
+function extractScene(fsource, fdest, sceneName, options) {
+
+  fs.readFile(fsource, 'utf8', (err, data) => {
+    const theme = JSON.parse(data);
+    const scene = {};
+    const itemsRequired = new Set();
+    const zip = new Archive();
+
+
+    scene.sources = theme['sources'].filter(item => item.name === sceneName);
+
+    if (scene.sources.length > 0) {
+      scene.name = sceneName;
+      if (scene.sources[0].settings.items !== undefined) {
+        const itemsList = Array.from(itemsRequired.add(checkItemsRequired(theme, scene.sources[0].settings.items.map(item => item.name)))).flat();
+
+        itemsList.forEach(itemName => {
+          let sceneCurr = theme['sources'].filter(itemCurr => itemCurr.name === itemName);
+          if (sceneCurr[0].settings.file !== undefined) console.log(sceneCurr[0].settings.file);
+
+          if (typeof(sceneCurr[0].settings.files) !== 'undefined') {
+            sceneCurr[0].settings.files.forEach(item => {
+              if (fs.existsSync(item.value)) {
+                if (fs.statSync(item.value).isFile()) {
+                  zip.addLocalFile(item.value, 'files/', path.win32.basename(item.value));
+                } else {
+                  zip.addFile('files/' + path.win32.basename(item.value) + '/', Buffer.alloc(0), "", fs.statSync(item.value));
+                  zip.addLocalFolder(item.value, 'files/' + path.win32.basename(item.value) + '/');
+                }
+              }
+            })
+          };
+
+          if ((typeof(sceneCurr[0].settings.file) !== 'undefined') && fs.existsSync(sceneCurr[0].settings.file)) {
+            zip.addLocalFile(sceneCurr[0].settings.file, 'files/', path.win32.basename(sceneCurr[0].settings.file))
+          };
+
+          if ((typeof(sceneCurr[0].settings.custom_font) !== 'undefined') && fs.existsSync(sceneCurr[0].settings.custom_font)) {
+            zip.addLocalFile(sceneCurr[0].settings.custom_font, 'files/', path.win32.basename(sceneCurr[0].settings.custom_font))
+          };
+
+          if ((typeof(sceneCurr[0].settings.local_file) !== 'undefined') && fs.existsSync(sceneCurr[0].settings.local_file)) {
+            zip.addLocalFile(sceneCurr[0].settings.local_file, 'files/', path.win32.basename(sceneCurr[0].settings.local_file))
+          };
+
+          scene.sources.push(...sceneCurr);
+        });
+
+
+      }
+
+      zip.addFile("scene.json", Buffer.from(JSON.stringify(scene), "utf8"));
+      zip.writeZip(fdest + ".otu");
+
+    } else console.log(sceneName + " is not present");
+  });
+
+}
 
 /**
  * @description importTheme return compatible scene version from original and extract files
@@ -85,7 +203,7 @@ function importTheme(fsource, fdest, options) {
   const scene = zip.getEntry('theme.json');
   const theme = JSON.parse(scene.getData().toString("utf8"));
   const currentDir = path.dirname(fdest);
-  const fontDir = process.env.LOCALAPPDATA + '\\Microsoft\\Windows\\Fonts\\'; // Windows 1
+  const fontDir = process.env.LOCALAPPDATA + '\\Microsoft\\Windows\\Fonts\\';
 
   theme["sources"].forEach(src => {
 
