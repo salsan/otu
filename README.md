@@ -32,7 +32,7 @@ otu-tool import -i myscenearchive.otu -o myscene.json
 
 # Todo
 - [ ] Check fonts ~~and install it if is required~~
-- [ ] Extract/Add single scene of your theme with relative files
+- [ ] ~~Extract~~/Add single scene of your theme with relative files
 - [ ] Convert [Streamlabs OBS](https://streamlabs.com/streamlabs-obs-live-streaming-software) scenes to [OBS Broadcaster Software](https://obsproject.com/)
 
 # License

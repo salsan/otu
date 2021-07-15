@@ -65,9 +65,9 @@ yargs(hideBin(process.argv))
         return false;
       }
     }
-  ).command('extract [input] [output]', 'extract scene from theme', {
+  ).command('extract [scene] [input] [output]', 'extract scene from theme', {
       input: {
-        description: 'insert path of theme want export',
+        description: 'insert path of theme want extract a scene',
         alias: 'i',
         demandOption: true,
         type: 'string',
@@ -117,7 +117,6 @@ function checkItemsRequired(theme, source) {
       const items = sceneCurr.settings.items.map(item => item.name);
       itemsRequired.push(checkItemsRequired(theme, items));
     }
-
   });
 
   return itemsRequired.flat();
@@ -149,7 +148,6 @@ function extractScene(fsource, fdest, sceneName, options) {
 
         itemsList.forEach(itemName => {
           let sceneCurr = theme['sources'].filter(itemCurr => itemCurr.name === itemName);
-          if (sceneCurr[0].settings.file !== undefined) console.log(sceneCurr[0].settings.file);
 
           if (typeof(sceneCurr[0].settings.files) !== 'undefined') {
             sceneCurr[0].settings.files.forEach(item => {
@@ -165,15 +163,15 @@ function extractScene(fsource, fdest, sceneName, options) {
           };
 
           if ((typeof(sceneCurr[0].settings.file) !== 'undefined') && fs.existsSync(sceneCurr[0].settings.file)) {
-            zip.addLocalFile(sceneCurr[0].settings.file, 'files/', path.win32.basename(sceneCurr[0].settings.file))
+            zip.addLocalFile(sceneCurr[0].settings.file, 'files/', path.win32.basename(sceneCurr[0].settings.file));
           };
 
           if ((typeof(sceneCurr[0].settings.custom_font) !== 'undefined') && fs.existsSync(sceneCurr[0].settings.custom_font)) {
-            zip.addLocalFile(sceneCurr[0].settings.custom_font, 'files/', path.win32.basename(sceneCurr[0].settings.custom_font))
+            zip.addLocalFile(sceneCurr[0].settings.custom_font, 'files/', path.win32.basename(sceneCurr[0].settings.custom_font));
           };
 
           if ((typeof(sceneCurr[0].settings.local_file) !== 'undefined') && fs.existsSync(sceneCurr[0].settings.local_file)) {
-            zip.addLocalFile(sceneCurr[0].settings.local_file, 'files/', path.win32.basename(sceneCurr[0].settings.local_file))
+            zip.addLocalFile(sceneCurr[0].settings.local_file, 'files/', path.win32.basename(sceneCurr[0].settings.local_file));
           };
 
           scene.sources.push(...sceneCurr);
@@ -184,6 +182,8 @@ function extractScene(fsource, fdest, sceneName, options) {
 
       zip.addFile("scene.json", Buffer.from(JSON.stringify(scene), "utf8"));
       zip.writeZip(fdest + ".otu");
+      console.log('Completed!!! ' + fdest + '.otu');
+
 
     } else console.log(sceneName + " is not present");
   });
@@ -218,8 +218,6 @@ function importTheme(fsource, fdest, options) {
     }
 
     if ((typeof(src.settings.file) !== 'undefined') && (zip.getEntry('files/' + path.win32.basename(src.settings.file)))) {
-      console.log(src.settings.file);
-
       src.settings.file = path.resolve(currentDir, 'files', path.win32.basename(src.settings.file));
       zip.extractEntryTo('files/' + path.win32.basename(src.settings.file), currentDir, true, true);
     }
@@ -301,15 +299,15 @@ function exportTheme(fsource, fdest, options) {
       };
 
       if ((typeof(src.settings.file) !== 'undefined') && fs.existsSync(src.settings.file)) {
-        zip.addLocalFile(src.settings.file, 'files/', path.win32.basename(src.settings.file))
+        zip.addLocalFile(src.settings.file, 'files/', path.win32.basename(src.settings.file));
       };
 
       if ((typeof(src.settings.custom_font) !== 'undefined') && fs.existsSync(src.settings.custom_font)) {
-        zip.addLocalFile(src.settings.custom_font, 'files/', path.win32.basename(src.settings.custom_font))
+        zip.addLocalFile(src.settings.custom_font, 'files/', path.win32.basename(src.settings.custom_font));
       };
 
       if ((typeof(src.settings.local_file) !== 'undefined') && fs.existsSync(src.settings.local_file)) {
-        zip.addLocalFile(src.settings.local_file, 'files/', path.win32.basename(src.settings.local_file))
+        zip.addLocalFile(src.settings.local_file, 'files/', path.win32.basename(src.settings.local_file));
       };
 
     });
