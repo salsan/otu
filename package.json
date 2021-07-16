@@ -18,7 +18,8 @@
   "keywords": [
     "OBS",
     "utility",
-    "tool"
+    "tool",
+    "cli"
   ],
   "author": "Salvatore Santagati info@salsan.dev",
   "license": "GPL-3.0-or-later",
