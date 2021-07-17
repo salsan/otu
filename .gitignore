@@ -105,6 +105,7 @@ dist
 
 # Pkg Binary
 otu-tool-*
+otu-tool.*
 
 # Vim Temp
 *~

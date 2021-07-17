@@ -106,6 +106,7 @@ yargs(hideBin(process.argv))
         description: 'insert path where save new theme',
         alias: 'o',
         type: 'string',
+        demandOption: true,
         requiresArg: true
       },
       scene: {
@@ -123,10 +124,52 @@ yargs(hideBin(process.argv))
         return false;
       }
     })
+  .command('show [input] [Options]', 'show info about theme', {
+      scene: {
+        description: 'show list of scene present',
+        type: 'boolean',
+        default: false
+      },
+      input: {
+        description: 'insert path of theme want show info',
+        alias: 'i',
+        demandOption: true,
+        type: 'string',
+        requiresArg: true,
+      }
+    },
+    (argv) => {
+      if (fs.existsSync(argv.input)) {
+        showInfo(argv.input, argv);
+      } else {
+        console.log(argv.input + "file doesn't exist")
+        return false;
+      }
+    })
   .help()
   .alias('help', 'h')
   .alias('version', 'v')
   .argv;
+
+
+function showInfo(fsource, options) {
+  fs.readFile(fsource, 'utf8', (err, data) => {
+    const theme = JSON.parse(data);
+
+    if (options.scene) {
+      theme.scene_order.forEach((scene, index) => {
+        console.log(index + '\t-  "' + scene.name + '"');
+        const itemsRequired = theme['sources'].filter(item => item.name === scene.name);
+        if (itemsRequired[0].settings.items !== undefined) {
+          itemsRequired[0].settings.items.forEach(res => {
+            console.log('\t\t -"' + res.name + '"')
+          });
+        }
+      })
+    }
+  })
+
+}
 
 /**
  * @description addScene add scene to theme
@@ -148,6 +191,14 @@ function addScene(fsource, fdest, sceneArchive, options) {
     theme.scene_order.push({
       "name": theme.name
     });
+
+    if (scene.hasOwnProperty('groups')) {
+      if (theme.hasOwnProperty('groups')) {
+        theme.groups.push(...scene.groups);
+      } else {
+        theme.groups = scene.groups;
+      }
+    }
 
     scene.sources.forEach(src => {
 
@@ -192,8 +243,6 @@ function addScene(fsource, fdest, sceneArchive, options) {
             console.log(`stdout:\n${stdout}`);
           })
         } else console.log("File exist : " + fontPath);
-
-
       }
 
       if (typeof(src.settings.local_file) !== 'undefined') {
@@ -227,10 +276,11 @@ function checkItemsRequired(theme, source) {
     itemsRequired.push(name);
 
     let sceneCurr = theme["sources"].filter(scene => scene.name == name)[0];
-
-    if (sceneCurr.settings.items !== undefined) {
-      const items = sceneCurr.settings.items.map(item => item.name);
-      itemsRequired.push(checkItemsRequired(theme, items));
+    if (sceneCurr !== undefined) {
+      if (sceneCurr.settings.items !== undefined) {
+        const items = sceneCurr.settings.items.map(item => item.name);
+        itemsRequired.push(checkItemsRequired(theme, items));
+      }
     }
   });
 
@@ -253,7 +303,6 @@ function extractScene(fsource, fdest, sceneName, options) {
     const itemsRequired = new Set();
     const zip = new Archive();
 
-
     scene.sources = theme['sources'].filter(item => item.name === sceneName);
 
     if (scene.sources.length > 0) {
@@ -263,33 +312,43 @@ function extractScene(fsource, fdest, sceneName, options) {
 
         itemsList.forEach(itemName => {
           let sceneCurr = theme['sources'].filter(itemCurr => itemCurr.name === itemName);
-
-          if (typeof(sceneCurr[0].settings.files) !== 'undefined') {
-            sceneCurr[0].settings.files.forEach(item => {
-              if (fs.existsSync(item.value)) {
-                if (fs.statSync(item.value).isFile()) {
-                  zip.addLocalFile(item.value, 'files/', path.win32.basename(item.value));
-                } else {
-                  zip.addFile('files/' + path.win32.basename(item.value) + '/', Buffer.alloc(0), "", fs.statSync(item.value));
-                  zip.addLocalFolder(item.value, 'files/' + path.win32.basename(item.value) + '/');
+          if (sceneCurr.length > 0) {
+            if (typeof(sceneCurr[0].settings.files) !== 'undefined') {
+              sceneCurr[0].settings.files.forEach(item => {
+                if (fs.existsSync(item.value)) {
+                  if (fs.statSync(item.value).isFile()) {
+                    zip.addLocalFile(item.value, 'files/', path.win32.basename(item.value));
+                  } else {
+                    zip.addFile('files/' + path.win32.basename(item.value) + '/', Buffer.alloc(0), "", fs.statSync(item.value));
+                    zip.addLocalFolder(item.value, 'files/' + path.win32.basename(item.value) + '/');
+                  }
                 }
+              })
+            };
+
+            if ((typeof(sceneCurr[0].settings.file) !== 'undefined') && fs.existsSync(sceneCurr[0].settings.file)) {
+              zip.addLocalFile(sceneCurr[0].settings.file, 'files/', path.win32.basename(sceneCurr[0].settings.file));
+            };
+
+            if ((typeof(sceneCurr[0].settings.custom_font) !== 'undefined') && fs.existsSync(sceneCurr[0].settings.custom_font)) {
+              zip.addLocalFile(sceneCurr[0].settings.custom_font, 'files/', path.win32.basename(sceneCurr[0].settings.custom_font));
+            };
+
+            if ((typeof(sceneCurr[0].settings.local_file) !== 'undefined') && fs.existsSync(sceneCurr[0].settings.local_file)) {
+              zip.addLocalFile(sceneCurr[0].settings.local_file, 'files/', path.win32.basename(sceneCurr[0].settings.local_file));
+            };
+
+            scene.sources.push(...sceneCurr);
+
+          } else {
+            if (theme.hasOwnProperty('groups')) {
+              if (scene.hasOwnProperty('groups')) {
+                scene.groups.push(theme['groups'].filter(item => (item.name === itemName))[0]);
+              } else {
+                scene.groups = (theme['groups'].filter(item => (item.name === itemName)));
               }
-            })
-          };
-
-          if ((typeof(sceneCurr[0].settings.file) !== 'undefined') && fs.existsSync(sceneCurr[0].settings.file)) {
-            zip.addLocalFile(sceneCurr[0].settings.file, 'files/', path.win32.basename(sceneCurr[0].settings.file));
-          };
-
-          if ((typeof(sceneCurr[0].settings.custom_font) !== 'undefined') && fs.existsSync(sceneCurr[0].settings.custom_font)) {
-            zip.addLocalFile(sceneCurr[0].settings.custom_font, 'files/', path.win32.basename(sceneCurr[0].settings.custom_font));
-          };
-
-          if ((typeof(sceneCurr[0].settings.local_file) !== 'undefined') && fs.existsSync(sceneCurr[0].settings.local_file)) {
-            zip.addLocalFile(sceneCurr[0].settings.local_file, 'files/', path.win32.basename(sceneCurr[0].settings.local_file));
-          };
-
-          scene.sources.push(...sceneCurr);
+            }
+          }
         });
 
 
@@ -301,7 +360,7 @@ function extractScene(fsource, fdest, sceneName, options) {
       console.log('Completed!!! ' + fdest + '.otu');
 
 
-    } else console.log(sceneName + " is not present");
+    } else console.log('"'+sceneName + '" is not present, please use showInfo command for see list of scene available, more info --help');
   });
 
 }
@@ -428,6 +487,7 @@ function exportTheme(fsource, fdest, options) {
 
     });
 
+    fdest = fdest || theme["name"];
     zip.addFile("theme.json", Buffer.from(JSON.stringify(theme), "utf8"));
     zip.writeZip(fdest + ".otu");
     console.log('Completed!!! ' + fdest + '.otu');
