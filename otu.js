@@ -125,7 +125,7 @@ yargs(hideBin(process.argv))
       }
     })
   .command('show [input] [Options]', 'show info about theme', {
-      scene: {
+      scenes: {
         description: 'show list of scene present',
         type: 'boolean',
         default: false
@@ -151,12 +151,17 @@ yargs(hideBin(process.argv))
   .alias('version', 'v')
   .argv;
 
+/**
+ * @description Show info about theme scene
+ * @param {string} fsource - source file
+ * @param {Object} options - Options
+ */
 
 function showInfo(fsource, options) {
   fs.readFile(fsource, 'utf8', (err, data) => {
     const theme = JSON.parse(data);
 
-    if (options.scene) {
+    if (options.scenes) {
       theme.scene_order.forEach((scene, index) => {
         console.log(index + '\t-  "' + scene.name + '"');
         const itemsRequired = theme['sources'].filter(item => item.name === scene.name);
@@ -261,8 +266,8 @@ function addScene(fsource, fdest, sceneArchive, options) {
     });
 
   });
-
 }
+
 /**
  * @description checkItemsRequired check all items required from scene
  * @param {Object} theme - full source of original theme
@@ -360,7 +365,7 @@ function extractScene(fsource, fdest, sceneName, options) {
       console.log('Completed!!! ' + fdest + '.otu');
 
 
-    } else console.log('"'+sceneName + '" is not present, please use showInfo command for see list of scene available, more info --help');
+    } else console.log('"' + sceneName + '" is not present, please use showInfo command for see list of scene available, more info --help');
   });
 
 }
