@@ -111,3 +111,7 @@ otu-tool.*
 *~
 *.swp
 *.swo
+
+# Archive
+*.zip
+*.otu
