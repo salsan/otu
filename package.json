@@ -5,12 +5,15 @@
     "yargs": "^17.0.1"
   },
   "name": "otu-tool",
-  "version": "0.0.7",
+  "version": "0.1.0",
   "bin": {
     "otu-tool": "otu.js"
   },
   "description": "OBS Themes Utility is an handle tool for work with your scenes of Open Broadcaster Software",
   "main": "otu.js",
+  "files": [
+    "lib/*.js"
+  ],
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

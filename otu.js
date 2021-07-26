@@ -13,6 +13,7 @@ const openType = require('opentype.js');
 const {
   exec
 } = require('child_process');
+const info = require('./libs/info.js');
 
 yargs(hideBin(process.argv))
   .scriptName("otu-tool")
@@ -140,7 +141,7 @@ yargs(hideBin(process.argv))
     },
     (argv) => {
       if (fs.existsSync(argv.input)) {
-        showInfo(argv.input, argv);
+        info(argv.input, argv);
       } else {
         console.log(argv.input + "file doesn't exist")
         return false;
@@ -151,30 +152,7 @@ yargs(hideBin(process.argv))
   .alias('version', 'v')
   .argv;
 
-/**
- * @description Show info about theme scene
- * @param {string} fsource - source file
- * @param {Object} options - Options
- */
 
-function showInfo(fsource, options) {
-  fs.readFile(fsource, 'utf8', (err, data) => {
-    const theme = JSON.parse(data);
-
-    if (options.scenes) {
-      theme.scene_order.forEach((scene, index) => {
-        console.log(index + '\t-  "' + scene.name + '"');
-        const itemsRequired = theme['sources'].filter(item => item.name === scene.name);
-        if (itemsRequired[0].settings.items !== undefined) {
-          itemsRequired[0].settings.items.forEach(res => {
-            console.log('\t\t -"' + res.name + '"')
-          });
-        }
-      })
-    }
-  })
-
-}
 
 /**
  * @description addScene add scene to theme
