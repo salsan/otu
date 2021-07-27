@@ -13,9 +13,9 @@ module.exports = function showInfo(fsource, options) {
     if (options.scenes) {
       theme.scene_order.forEach((scene, index) => {
         console.log(index + '\t-  "' + scene.name + '"');
-        const itemsRequired = theme['sources'].filter(item => item.name === scene.name);
-        if (itemsRequired[0].settings.items !== undefined) {
-          itemsRequired[0].settings.items.forEach(res => {
+        const itemsRequire = theme['sources'].filter(item => item.name === scene.name);
+        if (itemsRequire[0].settings.items !== undefined) {
+          itemsRequire[0].settings.items.forEach(res => {
             console.log('\t\t -"' + res.name + '"')
           });
         }
