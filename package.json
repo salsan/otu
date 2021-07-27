@@ -12,7 +12,7 @@
   "description": "OBS Themes Utility is an handle tool for work with your scenes of Open Broadcaster Software",
   "main": "otu.js",
   "files": [
-    "lib/*.js"
+    "libs/*.js"
   ],
   "devDependencies": {},
   "scripts": {
