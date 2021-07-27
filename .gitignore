@@ -115,3 +115,6 @@ otu-tool.*
 # Archive
 *.zip
 *.otu
+
+# Test File
+files/*
