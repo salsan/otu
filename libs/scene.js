@@ -2,6 +2,10 @@ const fs = require('fs');
 const AdmZip = require('adm-zip');
 const path = require('path');
 const items = require('./items.js');
+const openType = require('opentype.js');
+const {
+  exec
+} = require('child_process');
 
 /**
  * @description add scene to theme
