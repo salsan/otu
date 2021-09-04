@@ -2,7 +2,7 @@
   "dependencies": {
     "adm-zip": "^0.5.5",
     "opentype.js": "^1.3.3",
-    "yargs": "^17.1.0"
+    "yargs": "^17.1.1"
   },
   "name": "otu-tool",
   "version": "0.1.0",
